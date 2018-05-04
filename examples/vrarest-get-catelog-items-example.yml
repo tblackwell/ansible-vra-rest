@@ -1,0 +1,26 @@
+---
+# hosts could have been "remote" or "all" as well
+- hosts: vrops
+  gather_facts: no
+  tasks:
+   - name: Get a Bearer Token
+     vrarest:
+       host: vra-01a.corp.local
+       rest_method: get_bearer_token
+       username: jason
+       password: VMware1!
+       tenant: vsphere.local
+
+     register: bearer_result
+
+   - debug: msg="The returned token is {{ bearer_result.token }}"
+
+   - name: Get the Catalog Items
+     vrarest:
+       host: vra-01a.corp.local
+       rest_method: get_catalog_items
+       token: {{ bearer_result.token }}
+
+     register: catalog_items_result
+
+   - debug: msg="The returned token is {{ catalog_items_result.response_content }}"

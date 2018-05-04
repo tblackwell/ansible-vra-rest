@@ -1,0 +1,21 @@
+---
+# hosts could have been "remote" or "all" as well
+- hosts: vrops
+  #connection: local
+  #become: yes
+  #become_user: root
+  gather_facts: no
+  tasks:
+   - name: Get a Bearer Token
+     uri:
+       validate_certs: false
+       url: https://vra-01a.corp.local/identity/api/tokens
+       method: POST
+       body: "{\"username\":\"jason\",\"password\":\"VMware1!\",\"tenant\":\"vsphere.local\"}"
+       headers:
+         Accept: "application/json"
+         Content-Type: "application/json"
+       return_content: yes
+     register: bearer
+
+   - debug: msg="{{ bearer.content }}"
