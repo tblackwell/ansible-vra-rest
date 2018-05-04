@@ -19,8 +19,10 @@
      vrarest:
        host: vra-01a.corp.local
        rest_method: get_catalog_items
-       token: {{ bearer_result.token }}
+       token: "{{ bearer_result.token }}"
 
      register: catalog_items_result
 
-   - debug: msg="The returned token is {{ catalog_items_result.response_content }}"
+   - debug: msg="The response is {{ catalog_items_result }}"
+   - debug: msg="The content is {{ catalog_items_result['response_json'] }}"
+   - debug: msg="The ID for the CentOS 6.3 blueprint is {{ catalog_items_result['response_json'].content[0].catalogItemId }}"
