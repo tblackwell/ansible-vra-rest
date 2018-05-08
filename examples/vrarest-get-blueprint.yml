@@ -23,11 +23,12 @@
 
      register: catalog_items_result
 
-   - debug: msg="The response is {{ catalog_items_result }}"
-   - debug: msg="The content is {{ catalog_items_result['response_json'] }}"
-   - debug: msg="The ID for the CentOS 6.3 blueprint is {{ catalog_items_result['response_json'].content[0].catalogItemId }}"
+#   - debug: msg="The response is {{ catalog_items_result }}"
+#   - debug: msg="The content is {{ catalog_items_result['response_json'] }}"
+#   - debug: msg="The ID for the CentOS 6.3 blueprint is {{ catalog_items_result['response_json'].content[0].catalogItemId }}"
 
-   - name: Iterate over catalog items to find the blueprint.
+   - name: Iterate over catalog items to find the blueprint
      debug:
-       msg: "Catalog item ID {{ item.catalogItemId }}"
+       msg: "Item \\: {{ item.catalogItemId }}"
      with_items: "{{ catalog_items_result['response_json'].content }}"
+     when: item.name == "SQL 2016 Standard Standalone"
