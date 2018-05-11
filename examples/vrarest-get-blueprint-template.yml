@@ -1,0 +1,60 @@
+---
+# hosts could have been "remote" or "all" as well
+- hosts: vrops
+  gather_facts: no
+  tasks:
+   - name: Get a Bearer Token
+     vrarest:
+       host: vra-01a.corp.local
+       rest_method: get_bearer_token
+       username: jason
+       password: VMware1!
+       tenant: vsphere.local
+
+     register: bearer_result
+
+   - debug: msg="The returned token is {{ bearer_result.token }}"
+
+   - name: Get the Catalog Items
+     vrarest:
+       host: vra-01a.corp.local
+       rest_method: get_catalog_items
+       token: "{{ bearer_result.token }}"
+
+     register: catalog_items_result
+
+#   - debug: msg="The response is {{ catalog_items_result }}"
+#   - debug: msg="The content is {{ catalog_items_result['response_json'] }}"
+#   - debug: msg="The ID for the CentOS 6.3 blueprint is {{ catalog_items_result['response_json'].content[0].catalogItemId }}"
+
+#   - name: Iterate over catalog items to find the blueprint
+#     debug:
+#       msg: "Item \\: {{ item.catalogItemId }}"
+#     with_items: "{{ catalog_items_result['response_json'].content }}"
+#     when: item.name == "SQL 2016 Standard Standalone"
+
+   # This loop iterates over the list of catalog items returned from the
+   # "get_catalog_items" call, and searches for the one with the name matching
+   # the blueprint name being sought.  Once it finds it, it retrieves the
+   # relevant information from that item, and sets the appropriate variables to
+   # those values.
+   - name: Iterate over catalog items to find the blueprint and set the variable
+     set_fact:
+       catalog_item_id: "{{ item.catalogItemId }}"
+     with_items: "{{ catalog_items_result['response_json'].content }}"
+     when: item.name == "SQL 2016 Standard Standalone"
+
+   - debug:
+       msg: Value is {{ catalog_item_id }}
+
+   - name: Retrieve the blueprint template
+     vrarest:
+       host: vra-01a.corp.local
+       rest_method: get_blueprint_template
+       token: "{{ bearer_result.token }}"
+       catalog_item_id: "{{ catalog_item_id }}"
+
+     register: catalog_template_result
+
+   - debug:
+       msg: Template is {{ catalog_template_result['response_json'] }}

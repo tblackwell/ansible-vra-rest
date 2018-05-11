@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+SOCKET_TIMEOUT = 30
+DEFAULT_TENANT = 'vsphere.local'
+
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
@@ -47,6 +50,11 @@ options:
             - The bearer token to use with all calls other than the one to
               retrieve the bearer token.
         required: false
+    catalog_item_id:
+        description:
+            - The ID of the catalog item that is to be the target of the method
+              execution.
+        required: false
 
 author:
     - Todd Blackwell (@vmware.com)
@@ -83,8 +91,9 @@ def main():
         rest_method=dict(type='str', required=True, choices=['get_bearer_token', 'get_catalog_items', 'get_blueprint_template', 'submit_blueprint_request', 'check_blueprint_status']),
         username=dict(type='str', required=False),
         password=dict(type='str', required=False, no_log=True),
-        tenant=dict(type='str', default='vsphere.local'),
+        tenant=dict(type='str', required=False, default=DEFAULT_TENANT),
         token=dict(type='str', required=False),
+        catalog_item_id=dict(type='str', required=False),
         validate_certs=dict(type='str', required=False)
     )
 
@@ -115,7 +124,7 @@ def main():
     password = module.params['password']
     tenant = module.params['tenant']
     token = module.params['token']
-    socket_timeout = 30
+    catalog_item_id = module.params['catalog_item_id']
     body_format = 'json'
     body = ''
 
@@ -128,11 +137,15 @@ def main():
        method = 'GET'
        url = 'https://' + host + '/catalog-service/api/consumer/entitledCatalogItemViews'
        headers = {'Accept':'application/json','Content-Type':'application/json', 'Authorization':'Bearer ' + token}
+    elif rest_method == 'get_blueprint_template':
+       method = 'GET'
+       url = 'https://' + host + '/catalog-service/api/consumer/entitledCatalogItems/' + catalog_item_id + '/requests/template'
+       headers = {'Accept':'application/json', 'Authorization':'Bearer ' + token}
 
-    print("url: ", url)
-    print("body: ", body)
-    print("headers: ", headers)
-    print("method: ", method)
+    #print("url: ", url)
+    #print("body: ", body)
+    #print("headers: ", headers)
+    #print("method: ", method)
 
     # Make the request
     response, info = fetch_url(module,
@@ -140,9 +153,9 @@ def main():
                                data=body,
                                headers=headers,
                                method=method,
-                               timeout=socket_timeout)
+                               timeout=SOCKET_TIMEOUT)
 
-    print("response: ", response)
+    #print("response: ", response)
 
     # Retrieve the response content.
     response_content = response.read()
@@ -154,11 +167,23 @@ def main():
     print 'rest_method: ', rest_method
     if rest_method == 'get_bearer_token':
         result['token'] = response_json["id"]
-        print "token", result['token']
+        #print "token", result['token']
     elif rest_method == 'get_catalog_items':
         result['response_json'] = response_json
         result['response_content'] = response_content
-        print 'response_content', response_content
+        #print 'response_content', response_content
+    elif rest_method == 'get_blueprint_template':
+        result['response_json'] = response_json
+        result['response_content'] = response_content
+        #print 'response_content', response_content
+    elif rest_method == 'submit_blueprint_request':
+        result['response_json'] = response_json
+        result['response_content'] = response_content
+        #print 'response_content', response_content
+    elif rest_method == 'check_blueprint_status':
+        result['response_json'] = response_json
+        result['response_content'] = response_content
+        #print 'response_content', response_content
 
     # if the user is working with this module in only check mode we do not
     # want to make any changes to the environment, just return the current
