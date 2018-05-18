@@ -40,6 +40,11 @@ options:
             - The password for the user logging into the vRA  instance to
               retrieve a bearer token.
         required: false
+    vm_template:
+        description:
+            - The JSON blueprint template object that acts as the configuration
+              for the VM to be provisioned.
+        required: false
     tenant:
         description:
             - The tenant for the user making the REST call.  This will default
@@ -91,9 +96,10 @@ def main():
         rest_method=dict(type='str', required=True, choices=['get_bearer_token', 'get_catalog_items', 'get_blueprint_template', 'submit_blueprint_request', 'check_blueprint_status']),
         username=dict(type='str', required=False),
         password=dict(type='str', required=False, no_log=True),
+        vm_template=dict(type='str', required=False, default=""),
         tenant=dict(type='str', required=False, default=DEFAULT_TENANT),
         token=dict(type='str', required=False),
-        catalog_item_id=dict(type='str', required=False),
+        catalog_item_id=dict(type='str', required=False, default=""),
         validate_certs=dict(type='str', required=False)
     )
 
@@ -106,7 +112,8 @@ def main():
         changed=False,
         response_content='',
         response_json={},
-        token=''
+        token='',
+        output=''
     )
 
     # the AnsibleModule object will be our abstraction working with Ansible
@@ -122,27 +129,54 @@ def main():
     rest_method = module.params['rest_method']
     username = module.params['username']
     password = module.params['password']
+    vm_template = module.params['vm_template']
     tenant = module.params['tenant']
     token = module.params['token']
     catalog_item_id = module.params['catalog_item_id']
     body_format = 'json'
     body = ''
+    body_json = {}
 
     if rest_method == 'get_bearer_token':
         method = 'POST'
         url = 'https://' + host + '/identity/api/tokens'
-        headers = {'Accept':'application/json','Content-Type':'application/json'}
-        body = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\",\"tenant\":\"" + tenant + "\"}"
+        headers = {'Accept':'application/json',
+                   'Content-Type':'application/json'}
+        body_json = {'username': username,
+                     'password': password,
+                     'tenant': tenant}
+        body = json.dumps(body_json)
     elif rest_method == 'get_catalog_items':
-       method = 'GET'
-       url = 'https://' + host + '/catalog-service/api/consumer/entitledCatalogItemViews'
-       headers = {'Accept':'application/json','Content-Type':'application/json', 'Authorization':'Bearer ' + token}
+        method = 'GET'
+        url = 'https://' + host + '/catalog-service/api/consumer/entitledCatalogItemViews'
+        headers = {'Accept':'application/json',
+                   'Content-Type':'application/json',
+                   'Authorization':'Bearer ' + token}
     elif rest_method == 'get_blueprint_template':
-       method = 'GET'
-       url = 'https://' + host + '/catalog-service/api/consumer/entitledCatalogItems/' + catalog_item_id + '/requests/template'
-       headers = {'Accept':'application/json', 'Authorization':'Bearer ' + token}
+        method = 'GET'
+        url = 'https://' + host + '/catalog-service/api/consumer/entitledCatalogItems/' + catalog_item_id + '/requests/template'
+        headers = {'Accept':'application/json',
+                   'Authorization':'Bearer ' + token}
+    elif rest_method == 'submit_blueprint_request':
+        method = 'POST'
+        url = 'https://' + host + '/catalog-service/api/consumer/entitledCatalogItems/' + catalog_item_id + '/requests'
+        headers = {'Accept':'application/json',
+                   'Content-Type':'application/json',
+                   'Authorization':'Bearer ' + token}
+        #body_json = {'username': username,
+        #             'password': password,
+        #             'tenant': tenant}
+        #body = json.dumps(body_json)
+        body = vm_template
+        body = body.replace("None", "null")
+        body = body.replace("\'", "\"")
+        body = body.replace("False", "false")
+        body = body.replace("True", "true")
 
-    #print("url: ", url)
+    output = {'url': url,
+              'body': body,
+              'vm_template': vm_template,
+              'catalog_item_id': catalog_item_id}
     #print("body: ", body)
     #print("headers: ", headers)
     #print("method: ", method)
@@ -158,10 +192,15 @@ def main():
     #print("response: ", response)
 
     # Retrieve the response content.
-    response_content = response.read()
+    if response is None:
+        response_content = "{ 'Response': 'Is Null'}"
+        response_json = {'Response': 'Is Null'}
+    else:
+        response_content = response.read()
+        response_json = json.loads(response_content)
 
     # Parse the content into a JSON object.
-    response_json = json.loads(response_content)
+    #response_json = json.loads(response_content)
 
     # Retrieve the result parameters from the response.
     print 'rest_method: ', rest_method
@@ -201,6 +240,8 @@ def main():
     # AnsibleModule.fail_json() to pass in the message and the result
     if module.params['host'] == 'fail me':
         module.fail_json(msg='You requested this to fail', **result)
+
+    result['output'] = json.dumps(output)
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results

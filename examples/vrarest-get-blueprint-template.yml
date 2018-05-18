@@ -27,12 +27,6 @@
 #   - debug: msg="The content is {{ catalog_items_result['response_json'] }}"
 #   - debug: msg="The ID for the CentOS 6.3 blueprint is {{ catalog_items_result['response_json'].content[0].catalogItemId }}"
 
-#   - name: Iterate over catalog items to find the blueprint
-#     debug:
-#       msg: "Item \\: {{ item.catalogItemId }}"
-#     with_items: "{{ catalog_items_result['response_json'].content }}"
-#     when: item.name == "SQL 2016 Standard Standalone"
-
    # This loop iterates over the list of catalog items returned from the
    # "get_catalog_items" call, and searches for the one with the name matching
    # the blueprint name being sought.  Once it finds it, it retrieves the
@@ -47,6 +41,8 @@
    - debug:
        msg: Value is {{ catalog_item_id }}
 
+   # Retrieve the blueprint template using the catalog item ID for that
+   # template, which was retrieved from the previous REST call.
    - name: Retrieve the blueprint template
      vrarest:
        host: vra-01a.corp.local

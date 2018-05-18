@@ -14,3 +14,5 @@
      register: bearer_result
 
    - debug: msg="The returned token is {{ bearer_result.token }}"
+
+   - debug: msg="The returned output is {{ bearer_result.output }}"
