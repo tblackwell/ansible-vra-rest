@@ -1,0 +1,79 @@
+{
+   "requestedFor": "jason@corp.local",
+   "description": null,
+   "reasons": null,
+   "type": "com.vmware.vcac.catalog.domain.request.CatalogItemProvisioningRequest",
+   "catalogItemId": "e5dd4fba-45ed-4943-b1fc-7f96239286be",
+   "businessGroupId": "29a02ed9-7e63-4c77-8a15-c930afb0e3d8",
+   "data": {
+      "_leaseDays": null,
+      "_archiveDays": 5,
+      "CentOS_6.3": {
+         "classId": "Blueprint.Component.Declaration",
+         "componentTypeId": "com.vmware.csp.component.cafe.composition",
+         "typeFilter": "CentOS63*CentOS_6.3",
+         "componentId": null,
+         "data": {
+            "_hasChildren": false,
+            "datacenter_location": null,
+            "security_tags": [],
+            "reservation_policy": null,
+            "security_groups": [],
+            "guest_customization_specification": "CentOS",
+            "nics": null,
+            "storage": 3,
+            "os_arch": "x86_64",
+            "_cluster": 1,
+            "os_version": null,
+            "memory": 512,
+            "max_per_user": 0,
+            "description": "Basic IaaS CentOS Machine",
+            "machine_prefix": null,
+            "disks": [
+               {
+                  "classId": "Infrastructure.Compute.Machine.MachineDisk",
+                  "componentTypeId": "com.vmware.csp.iaas.blueprint.service",
+                  "typeFilter": null,
+                  "componentId": null,
+                  "data": {
+                     "capacity": 3,
+                     "custom_properties": null,
+                     "storage_reservation_policy": "",
+                     "userCreated": false,
+                     "volumeId": 0,
+                     "initial_location": "",
+                     "label": "Hard disk 1",
+                     "is_clone": true,
+                     "id": 1450725224066
+                  }
+               }
+            ],
+            "_allocation": {
+               "classId": "Infrastructure.Compute.Machine.Allocation",
+               "componentTypeId": "com.vmware.csp.iaas.blueprint.service",
+               "typeFilter": null,
+               "componentId": null,
+               "data": {
+                  "machines": null
+               }
+            },
+            "max_network_adapters": -1,
+            "max_volumes": 60,
+            "property_groups": null,
+            "os_type": "Linux",
+            "os_distribution": null,
+            "cpu": 1
+         }
+      },
+      "_number_of_instances": 1,
+      "corp192168110024": {
+         "classId": "Blueprint.Component.Declaration",
+         "componentTypeId": "com.vmware.csp.component.cafe.composition",
+         "typeFilter": "CentOS63*corp192168110024",
+         "componentId": null,
+         "data": {
+            "_hasChildren": false
+         }
+      }
+   }
+}

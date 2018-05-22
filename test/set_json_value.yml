@@ -1,0 +1,13 @@
+---
+- hosts: vrops
+  vars:
+    template: "{{ lookup('file','blueprint_template.json')|from_json }}"
+
+  tasks:
+  - name: Set the blueprint name
+    set_fact:
+      blueprint_name: "CentOS_6.3"
+
+  - name: Iterate
+    debug: var=item
+    with_items: "{{ template|json_query('data.\" + blueprint_name + \".data.memory') }}"
