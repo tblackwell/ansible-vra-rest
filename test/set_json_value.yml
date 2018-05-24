@@ -1,6 +1,7 @@
 ---
 - hosts: vrops
   vars:
+    package_dir: /root/ansible-vra-rest/test
     template: "{{ lookup('file','blueprint_template.json')|from_json }}"
 
   tasks:
@@ -8,6 +9,37 @@
     set_fact:
       blueprint_name: "CentOS_6.3"
 
-  - name: Iterate
-    debug: var=item
-    with_items: "{{ template|json_query('data.\" + blueprint_name + \".data.memory') }}"
+  - name: Print the template object
+    debug:
+      msg: "Template: {{ template }}"
+
+  - name: Print "requestedFor"
+    debug:
+      msg: "{{ template|json_query('requestedFor') }}"
+
+  - name: Set query
+    set_fact:
+      query: 'data.["CentOS_6.3".data.memory]'
+
+  - name: Print query
+    debug:
+      msg: "Query: {{ query }}"
+
+  - name: Print "memory"
+    debug:
+      msg: "Memory is {{ template|json_query(query) }}"
+
+  - name: Setting memory to 1024
+    jsonmodify:
+      json: "{{ template }}"
+      json_path: "data/CentOS_6.3/data/memory"
+      new_value: 1024
+
+    register: json_modify_result
+
+  - debug:
+      msg: Output is {{ json_modify_result['modified_json'] }}
+
+  - name: Print memory again
+    debug:
+      msg: "Memory is {{ json_modify_result['modified_json']|json_query(query) }}"

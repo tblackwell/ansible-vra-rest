@@ -10,12 +10,45 @@ def id_generator(dict_var):
                  for id_val in id_generator(v):
                        yield id_val
 
+def set_json_value(path_list, json_object, new_value):
+    if len(path_list) > 1:
+        first_path_element = path_list.pop(0)
+        new_json_object = json_object[first_path_element]
+        print "New JSON object: ", new_json_object
+        return set_json_value(path_list, new_json_object, new_value)
+    else:
+        json_object[path_list[0]] = new_value
+        print "json_object: ", json_object
+        return json_object
+
 json_data = '{"name":"John","age":30,"cars": {"car1":"Ford","car2":"BMW","car3":"Fiat"}}'
 python_obj = json.loads(json_data)
 print python_obj["name"]
 print python_obj["age"]
+print python_obj["cars"]["car2"]
 
-json_example_file = open('json_example.txt', 'r+')
+car_path = "cars/car2"
+car_path_list = car_path.split("/")
+print "Length of path list: ", len(car_path_list)
+
+
+#python_obj_path = "python_obj"
+#for car_path_segment in car_path_list:
+#    python_obj_path = python_obj_path + "[\'" + car_path_segment + "\']"
+
+print "python_obj before: ", python_obj
+new_python_obj = set_json_value(car_path_list, python_obj, "Tesla")
+print "python_obj after: ", python_obj
+
+
+#exec(python_obj_path + " = " + "Tesla")
+
+#print "Hopefully modified JSON: ", python_obj
+
+
+
+
+json_example_file = open('/root/ansible-vra-rest/test/json_example.txt', 'r+')
 json_example_raw = json_example_file.read()
 json_example_file.close()
 
@@ -28,7 +61,7 @@ print "JSON Example Parsed", json_example_obj
 print ""
 print ""
 
-json_template_file = open('vm_template_raw.txt', 'r+')
+json_template_file = open('/root/ansible-vra-rest/test/vm_template_raw.txt', 'r+')
 json_template_raw = json_template_file.read()
 json_template_file.close()
 
