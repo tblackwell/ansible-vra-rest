@@ -1,13 +1,14 @@
 ---
 - hosts: vrops
   vars:
+    blueprint_name: "CentOS 6.3"
     package_dir: /root/ansible-vra-rest/test
     template: "{{ lookup('file','blueprint_template.json')|from_json }}"
 
-  tasks:
-  - name: Set the blueprint name
-    set_fact:
-      blueprint_name: "CentOS_6.3"
+  # tasks:
+  # - name: Set the blueprint name
+  #   set_fact:
+  #     blueprint_name: "CentOS 6.3"
 
   - name: Print the template object
     debug:
@@ -29,10 +30,14 @@
     debug:
       msg: "Memory is {{ template|json_query(query) }}"
 
+  - name: Create the memory path
+    set_fact:
+      memory_path: "data/{{ blueprint_name }}/data/memory"
+
   - name: Setting memory to 1024
     jsonmodify:
       json: "{{ template }}"
-      json_path: "data/CentOS_6.3/data/memory"
+      json_path: "{{ memory_path }}"
       new_value: 1024
 
     register: json_modify_result

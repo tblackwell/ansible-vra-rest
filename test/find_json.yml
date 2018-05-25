@@ -1,0 +1,51 @@
+---
+# hosts could have been "remote" or "all" as well
+- hosts: vrops
+  vars:
+     blueprint_name: "CentOS 6.3"
+     string_to_replace: CentOS 6.3"
+  tasks:
+   - name: Get a Bearer Token
+     vrarest:
+       host: vra-01a.corp.local
+       rest_method: get_bearer_token
+       username: jason
+       password: VMware1!
+       tenant: vsphere.local
+
+     register: bearer_result
+
+   - debug: msg="The returned token is {{ bearer_result.token }}"
+
+   - name: Get the Catalog Items
+     vrarest:
+       host: vra-01a.corp.local
+       rest_method: get_catalog_items
+       token: "{{ bearer_result.token }}"
+
+     register: catalog_items_result
+
+   - name: Get the list of blueprint templates
+     set_fact:
+       blueprint_templates: "{{ catalog_items_result['response_json'].content }}"
+
+   # - name: Print out the list of blueprint templates
+   #   debug:
+   #     msg: "The list of blueprint templates: {{ blueprint_templates }}"
+
+   - name: Create the JSON path
+     set_fact:
+       memory_path: "data/{{ blueprint_name }}/data/memory"
+
+   - name: Iterate over the blueprint templates
+     debug: msg="{{ item.name }}"
+     with_items: "{{ blueprint_templates }}"
+     when: item.name == blueprint_name
+
+   - name: Replace spaces with underscores
+     set_fact:
+       new_string: "{{ string_to_replace | replace(' ', '_') }}"
+
+   - name: Print out new string
+     debug:
+       msg: "New string: {{ new_string }}"

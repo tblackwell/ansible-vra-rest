@@ -60,7 +60,7 @@ from ansible.module_utils.basic import AnsibleModule
 # A recursive function that sets the specified value into the given JSON object.
 #
 # TODO: Modify this function so that if the path element is a number, then treat
-#       outer-most JSON object as a list with the number being the index.
+#       the outer-most JSON object as a list with the number being the index.
 def set_json_value(json, path_list, new_value):
 
 
@@ -93,8 +93,10 @@ def main():
     json_path = module.params['json_path']
     new_value = module.params['new_value']
 
+    # Break apart the JSON path into a list of path segments.
     path_list = json_path.split("/")
 
+    # Call the recursive function to set the new value.
     set_json_value(json, path_list, new_value)
 
     output = {'modified_json': json}
