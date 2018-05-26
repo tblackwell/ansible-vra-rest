@@ -63,7 +63,6 @@ from ansible.module_utils.basic import AnsibleModule
 #       the outer-most JSON object as a list with the number being the index.
 def set_json_value(json, path_list, new_value):
 
-
     if len(path_list) > 1:
         outer_most_path_element = path_list.pop(0)
         sub_json_object = json[outer_most_path_element]

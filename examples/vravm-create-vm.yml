@@ -1,0 +1,17 @@
+---
+# hosts could have been "remote" or "all" as well
+- hosts: vrops
+  tasks:
+   - vravm:
+       host: vra-01a.corp.local
+       username: jason
+       password: VMware1!
+       tenant: vsphere.local
+       blueprint_name: "CentOS 6.3"
+       memory: 1024
+       cpu_count: 2
+
+     register: vravm_result
+
+   - debug:
+       msg: "Output: {{ vravm_result['output'] }}"

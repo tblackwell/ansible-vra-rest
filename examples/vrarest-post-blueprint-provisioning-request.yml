@@ -32,13 +32,13 @@
      register: catalog_items_result
 
    #============================================================================
-   # Get the list of blueprint templates.
+   # Get the list of catalog items.
    #============================================================================
-   - name: Get the list of blueprint templates
+   - name: Get the list of catalog items
      set_fact:
        blueprint_templates: "{{ catalog_items_result['response_json'].content }}"
 
-   - name: Print out the list of blueprint templates
+   - name: Print out the list of catalog items
      debug:
        msg: "The list of blueprint templates: {{ blueprint_templates }}"
 
@@ -62,7 +62,7 @@
        rest_method: get_blueprint_template
        token: "{{ bearer_result.token }}"
        catalog_item_id: "{{ catalog_item_id }}"
-       vm_template: "{{ catalog_item_id }}"
+       #vm_template: "{{ catalog_item_id }}"
 
      register: catalog_template_result
 
