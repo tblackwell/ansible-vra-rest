@@ -14,15 +14,11 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = '''
 ---
 module: vravm
-
 short_description: A module that wraps the vRA 7 REST calls.
-
 version_added: "2.4"
-
 description:
     - This module provides a wrapper for making vRA API REST calls to a specific
       vRA instance.
-
 options:
     host:
         description:
@@ -62,7 +58,6 @@ options:
             - The ID of the catalog item that is to be the target of the method
               execution.
         required: false
-
 author:
     - Todd Blackwell (@vmware.com)
 '''
@@ -109,9 +104,23 @@ def main():
         tenant=dict(type='str', required=False, default=DEFAULT_TENANT),
         blueprint_name=dict(type='str', required=False),
         memory=dict(type='str', required=False, default=DEFAULT_MEMORY),
-        cpu_count=dict(type='str', required=False, default=DEFAULT_CPUS),
-        validate_certs=dict(type='str', required=False) # This parameter is necessary to avoid a certificate error
+        cpu_count=dict(type='str', required=False, default=DEFAULT_CPUS
+        num_of_instances=dict(type='num', required=False, default=1)
+        wait_for_vm=dict(type='str', required=False, default=False),
+        validate_certs=dict(type='str', required=False)
     )
+
+    body_format = 'json'
+    body = ''
+    body_json = {}
+    output = {'headers': '',
+              'url': '',
+              'bearer_token': '',
+              'catalog_items': {},
+              'blueprint_catalog_item_id': '',
+              'blueprint_item': {},
+              'blueprint_template': {},
+              'response': {}}
 
     # seed the result dict in the object
     # we primarily care about changed and state
@@ -139,6 +148,7 @@ def main():
     blueprint_name = module.params['blueprint_name']
     memory = module.params['memory']
     cpu_count = module.params['cpu_count']
+    number_of_instances = module.params['num_of_instances']
     body_format = 'json'
     body = ''
     body_json = {}
@@ -175,7 +185,7 @@ def main():
     response_json = json.loads(response_content)
     bearer_token = response_json["id"]
 
-    #output['bearer_token'] = bearer_token
+    output['bearer_token'] = bearer_token
 
     #===========================================================================
     # Get the list of catalog items.
@@ -199,14 +209,18 @@ def main():
 
     # Find the catalog item that matches the blueprint name passed into this
     # module.
+    blueprint_item = {}
     for catalog_item in catalog_items:
         if catalog_item['name'] == blueprint_name:
             blueprint_item = catalog_item
 
-    blueprint_catalog_item_id = blueprint_item['catalogItemId']
+    if blueprint_item:
+        blueprint_catalog_item_id = blueprint_item['catalogItemId']
 
-    #output['blueprint_item'] = blueprint_item
-    #output['blueprint_catalog_item_id'] = blueprint_catalog_item_id
+        output['blueprint_item'] = blueprint_item
+        output['blueprint_catalog_item_id'] = blueprint_catalog_item_id
+    else:
+        raise Exception("Blueprint could not be found")
 
     #===========================================================================
     # Get the blueprint template using the catalog ID.
@@ -227,7 +241,7 @@ def main():
     response_content = response.read()
     blueprint_template = json.loads(response_content)
 
-    #output['blueprint_template'] = blueprint_template
+    output['blueprint_template'] = blueprint_template
 
     #===========================================================================
     # Update the template with the new values supplied by the user.
@@ -235,12 +249,15 @@ def main():
     blueprint_data_item_name = blueprint_name.replace(' ', '_')
     memory_path = 'data/' + blueprint_data_item_name + '/data/memory'
     cpus_path = 'data/' + blueprint_data_item_name + '/data/cpu'
+    number_of_instances_path = 'data/_number_of_instances'
 
     memory_path_list = memory_path.split('/')
     cpus_path_list = cpus_path.split('/')
+    number_of_instances_list = number_of_instances_path.split('/')
 
     set_json_value(blueprint_template, memory_path_list, memory)
     set_json_value(blueprint_template, cpus_path_list, cpu_count)
+    set_json_value(blueprint_template, number_of_instances_list, cpu_count)
 
     #===========================================================================
     # Submit the modified blueprint template to provision the VM.
@@ -260,10 +277,10 @@ def main():
                                timeout=SOCKET_TIMEOUT)
 
     output['response'] = response
-    #output['url'] = url
-    #output['headers'] = headers
-    #response_content = response.read()
-    #blueprint_template = json.loads(response_content)
+    output['url'] = url
+    output['headers'] = headers
+    response_content = response.read()
+    blueprint_template = json.loads(response_content)
 
     # If the user is working with this module in only check mode we do not
     # want to make any changes to the environment, just return the current
@@ -282,7 +299,7 @@ def main():
     if module.params['host'] == 'fail me':
         module.fail_json(msg='You requested this to fail', **result)
 
-    result['output'] = json.dumps(output)
+    result['output'] = output
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results

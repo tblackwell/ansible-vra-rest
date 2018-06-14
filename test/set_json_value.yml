@@ -5,7 +5,7 @@
     package_dir: /root/ansible-vra-rest/test
     template: "{{ lookup('file','blueprint_template.json')|from_json }}"
 
-  # tasks:
+  tasks:
   # - name: Set the blueprint name
   #   set_fact:
   #     blueprint_name: "CentOS 6.3"

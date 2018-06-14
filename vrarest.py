@@ -68,7 +68,7 @@ author:
 EXAMPLES = '''
 # Retrieve a bearer token
 - name: Get a Bearer Token
-  vra7rest:
+  vrarest:
     host: vra-01a.corp.local
     rest_method: get_bearer_token
     username: jason

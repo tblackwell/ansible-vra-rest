@@ -1,10 +1,7 @@
 ---
-# hosts could have been "remote" or "all" as well
+# A simple example that utilizes the uri module to make a REST call to a vRA
+# instance to retrieve a bearer token.
 - hosts: vrops
-  #connection: local
-  #become: yes
-  #become_user: root
-  gather_facts: no
   tasks:
    - name: Get a Bearer Token
      uri:

@@ -1,5 +1,6 @@
 ---
-# hosts could have been "remote" or "all" as well
+# This example makes use of all the available functionality within the vrarest
+# module to configure, and execute a provisoining request for a VM.
 - hosts: vrops
   vars:
      blueprint_item_name: "CentOS 6.3"
