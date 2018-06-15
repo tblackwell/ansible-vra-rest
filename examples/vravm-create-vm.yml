@@ -12,7 +12,7 @@
        blueprint_name: "CentOS 6.3"
        memory: 1024
        cpu_count: 2
-       num_of_instances: 1
+       number_of_instances: 1
 
      register: vravm_result
 

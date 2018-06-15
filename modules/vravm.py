@@ -1,4 +1,4 @@
-#!/usr/bin/python
+ #!/usr/bin/python
 
 SOCKET_TIMEOUT = 30
 DEFAULT_TENANT = 'vsphere.local'
@@ -104,8 +104,8 @@ def main():
         tenant=dict(type='str', required=False, default=DEFAULT_TENANT),
         blueprint_name=dict(type='str', required=False),
         memory=dict(type='str', required=False, default=DEFAULT_MEMORY),
-        cpu_count=dict(type='str', required=False, default=DEFAULT_CPUS
-        num_of_instances=dict(type='num', required=False, default=1)
+        cpu_count=dict(type='str', required=False, default=DEFAULT_CPUS),
+        number_of_instances=dict(type='str', required=False, default='1'),
         wait_for_vm=dict(type='str', required=False, default=False),
         validate_certs=dict(type='str', required=False)
     )
@@ -148,7 +148,7 @@ def main():
     blueprint_name = module.params['blueprint_name']
     memory = module.params['memory']
     cpu_count = module.params['cpu_count']
-    number_of_instances = module.params['num_of_instances']
+    number_of_instances = module.params['number_of_instances']
     body_format = 'json'
     body = ''
     body_json = {}
@@ -257,7 +257,7 @@ def main():
 
     set_json_value(blueprint_template, memory_path_list, memory)
     set_json_value(blueprint_template, cpus_path_list, cpu_count)
-    set_json_value(blueprint_template, number_of_instances_list, cpu_count)
+    set_json_value(blueprint_template, number_of_instances_list, number_of_instances)
 
     #===========================================================================
     # Submit the modified blueprint template to provision the VM.
@@ -299,7 +299,7 @@ def main():
     if module.params['host'] == 'fail me':
         module.fail_json(msg='You requested this to fail', **result)
 
-    result['output'] = output
+    #result['output'] = output
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results
